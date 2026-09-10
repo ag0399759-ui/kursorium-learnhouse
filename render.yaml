@@ -1,0 +1,54 @@
+databases:
+  - name: learnhouse-db
+    databaseName: learnhouse
+    user: learnhouse
+    plan: free
+    region: oregon
+
+services:
+  - type: redis
+    name: learnhouse-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+
+  - type: web
+    name: learnhouse
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: learnhouse-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: learnhouse-redis
+          property: connectionString
+      - key: LEARNHOUSE_DOMAIN
+        value: kursorium.com
+      - key: LEARNHOUSE_FRONTEND_DOMAIN
+        value: kursorium.com
+      - key: LEARNHOUSE_ENV
+        value: production
+      - key: LEARNHOUSE_SSL
+        value: "true"
+      - key: LEARNHOUSE_TENANCY
+        value: single
+      - key: LEARNHOUSE_INITIAL_ADMIN_EMAIL
+        value: ag0399759@gmail.com
+      - key: LEARNHOUSE_INITIAL_ADMIN_PASSWORD
+        value: Admin2026!
+      - key: LEARNHOUSE_INITIAL_ORG_NAME
+        value: Kursorium
+      - key: LEARNHOUSE_INITIAL_ORG_SLUG
+        value: kursorium
+      - key: NEXT_PUBLIC_LEARNHOUSE_DOMAIN
+        value: kursorium.com
+      - key: NEXT_PUBLIC_LEARNHOUSE_HTTPS
+        value: "true"
+      - key: PORT
+        value: "10000"
