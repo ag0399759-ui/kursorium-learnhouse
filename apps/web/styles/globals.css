@@ -1,9 +1,11 @@
-﻿/*
+/*
   ---break---
 */
 @plugin 'tailwindcss-animate';
 
 @import 'tailwindcss';
+@import './ai-activity-premium.css';
+@import './activity-2026.css';
 
 
 @custom-variant dark (&:is(.dark *));
