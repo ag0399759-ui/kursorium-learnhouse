@@ -53,15 +53,7 @@ jobs:
             -d "{\"query\":\"mutation { serviceInstanceUpdate(input: { source: { image: \\\"$IMAGE\\\" } }, environmentId: \\\"1deef1af-6e6c-4a12-a5d1-34e9f7558938\\\", serviceId: \\\"978eeedb-ae4b-4b1e-890a-f0b47e00b508\\\") }\"}")
           echo "Update source: $UPDATE"
 
-          sleep 10
-
-          # List all mutations with 'deploy' or 'image' in name
-          MUTS=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
-            -H "Authorization: Bearer $RAILWAY_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"query":"{ __type(name: \"Mutation\") { fields { name } } }"}')
-          echo "$MUTS" | grep -o '"name":"[^"]*deploy[^"]*"' | head -20
-          echo "$MUTS" | grep -o '"name":"[^"]*Deploy[^"]*"' | head -20
+          sleep 5
 
           # Verify current source
           SOURCE=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
@@ -70,10 +62,25 @@ jobs:
             -d '{"query":"{ serviceInstance(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { source { image repo } } }"}')
           echo "Current source: $SOURCE"
 
-          # Try serviceInstanceRedeploy after source update + sleep
+          # Try serviceInstanceDeployV2 first (best for image-based deploys)
+          DEPLOY_V2=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"mutation { serviceInstanceDeployV2(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { id status } }"}' 2>/dev/null || echo "DeployV2 not supported")
+          echo "DeployV2: $DEPLOY_V2"
+
+          # Also try serviceInstanceDeploy
+          DEPLOY=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"mutation { serviceInstanceDeploy(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { id status } }"}' 2>/dev/null || echo "Deploy not supported")
+          echo "Deploy: $DEPLOY"
+
+          # Fallback
           REDEPLOY=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
             -H "Authorization: Bearer $RAILWAY_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{"query":"mutation { serviceInstanceRedeploy(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") }"}')
           echo "Redeploy: $REDEPLOY"
           echo "Done: $IMAGE"
+
