@@ -1,0 +1,721 @@
+/* ============================================================
+   KURSORIUM DESIGN SYSTEM 2026
+   Single source of truth — замінює ai-activity-premium.css та activity-2026.css
+   Brand: #7C3AED purple | Light theme only | Plus Jakarta Sans + Inter
+   WCAG 2.1 AA | 8pt grid | Major Third type scale
+   ============================================================ */
+
+/* ── 1. GOOGLE FONTS ── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+
+/* ── 2. CSS TOKENS ── */
+:root {
+  /* Brand */
+  --kurs-brand-600:   #7C3AED;
+  --kurs-brand-500:   #8B5CF6;
+  --kurs-brand-400:   #A78BFA;
+  --kurs-brand-100:   #EDE9FE;
+  --kurs-brand-50:    #F5F3FF;
+
+  /* Neutral */
+  --kurs-n-900: #18181B;
+  --kurs-n-800: #27272A;
+  --kurs-n-600: #52525B;
+  --kurs-n-500: #71717A;
+  --kurs-n-400: #A1A1AA;
+  --kurs-n-300: #D4D4D8;
+  --kurs-n-200: #E4E4E7;
+  --kurs-n-100: #F4F4F5;
+  --kurs-n-50:  #FAFAFA;
+
+  /* Semantic */
+  --kurs-success:    #10B981;
+  --kurs-success-bg: #ECFDF5;
+  --kurs-error:      #EF4444;
+  --kurs-error-bg:   #FEF2F2;
+
+  /* Shadows */
+  --kurs-shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --kurs-shadow-md: 0 4px 12px rgba(124,58,237,0.06), 0 1px 3px rgba(0,0,0,0.06);
+  --kurs-shadow-lg: 0 10px 30px rgba(124,58,237,0.10), 0 4px 8px rgba(0,0,0,0.06);
+
+  /* Radius */
+  --kurs-r-sm:   6px;
+  --kurs-r-md:   10px;
+  --kurs-r-lg:   14px;
+  --kurs-r-xl:   16px;
+  --kurs-r-full: 9999px;
+}
+
+/* ── 3. KEYFRAMES ── */
+@keyframes kurs-fadein {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kurs-correct-bounce {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.05); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes kurs-wrong-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+/* ── 4. BASE TYPOGRAPHY ── */
+body, html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── 5. PROSEMIRROR CONTENT ── */
+.canva-content-wrapper {
+  background: #FFFFFF;
+}
+
+.canva-content-wrapper .ProseMirror {
+  padding: 32px 40px;
+  color: var(--kurs-n-800);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  max-width: 760px;
+  caret-color: var(--kurs-brand-600);
+  animation: kurs-fadein 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* H1 */
+.canva-content-wrapper .ProseMirror h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* H2 — with purple bottom line */
+.canva-content-wrapper .ProseMirror h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--kurs-brand-100);
+}
+
+/* H3 */
+.canva-content-wrapper .ProseMirror h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--kurs-n-800);
+  margin-top: 32px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+/* H4 */
+.canva-content-wrapper .ProseMirror h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--kurs-n-800);
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+/* Paragraphs */
+.canva-content-wrapper .ProseMirror p {
+  color: var(--kurs-n-800);
+  font-size: 16px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+/* Bold */
+.canva-content-wrapper .ProseMirror strong,
+.canva-content-wrapper .ProseMirror b {
+  color: var(--kurs-n-900);
+  font-weight: 700;
+}
+
+/* Bullet list — card style */
+.canva-content-wrapper .ProseMirror ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.canva-content-wrapper .ProseMirror ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 17px;
+  background: #F8F7FF;
+  border: 1px solid #DDD6FE;
+  border-radius: var(--kurs-r-md);
+  color: var(--kurs-n-800);
+  font-size: 15px;
+  line-height: 1.65;
+  transition: all 0.15s ease;
+}
+
+.canva-content-wrapper .ProseMirror ul li::before {
+  content: '✓';
+  color: var(--kurs-success);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.canva-content-wrapper .ProseMirror ul li p {
+  margin: 0;
+}
+
+.canva-content-wrapper .ProseMirror ul li:hover {
+  background: var(--kurs-brand-100);
+  border-color: var(--kurs-brand-400);
+  transform: translateX(4px);
+}
+
+/* Ordered list */
+.canva-content-wrapper .ProseMirror ol {
+  padding-left: 1.5rem !important;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.canva-content-wrapper .ProseMirror ol li {
+  color: var(--kurs-n-800);
+  font-size: 15px;
+  line-height: 1.7;
+  padding: 4px 0;
+}
+
+.canva-content-wrapper .ProseMirror ol li::marker {
+  color: var(--kurs-brand-600);
+  font-weight: 700;
+}
+
+/* Blockquote */
+.canva-content-wrapper .ProseMirror blockquote {
+  border-left: 4px solid var(--kurs-brand-600);
+  margin: 24px 0;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--kurs-brand-50), #FAFAFA);
+  border-radius: 0 12px 12px 0;
+  color: var(--kurs-n-600);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Inline code */
+.canva-content-wrapper .ProseMirror code {
+  background: var(--kurs-brand-50);
+  color: var(--kurs-brand-600);
+  font-size: 0.875em;
+  padding: 0.2em 0.45em;
+  border-radius: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid #DDD6FE;
+}
+
+/* Links */
+.canva-content-wrapper .ProseMirror a {
+  color: var(--kurs-brand-600);
+  text-decoration: none;
+  border-bottom: 1.5px solid #DDD6FE;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.canva-content-wrapper .ProseMirror a:hover {
+  color: #6D28D9;
+  border-bottom-color: var(--kurs-brand-600);
+}
+
+/* Images */
+.canva-content-wrapper .ProseMirror img {
+  max-width: 100%;
+  border-radius: var(--kurs-r-lg);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin: 20px 0;
+}
+
+/* Horizontal rule */
+.canva-content-wrapper .ProseMirror hr {
+  border: none;
+  border-top: 2px solid var(--kurs-n-200);
+  margin: 32px 0;
+}
+
+/* Video / iframe */
+.canva-content-wrapper video,
+.canva-content-wrapper iframe {
+  border-radius: var(--kurs-r-xl);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  display: block;
+}
+
+/* ── 6. TABLE OF CONTENTS ── */
+.canva-content-wrapper .toc-item,
+.canva-content-wrapper [class*="toc"] li {
+  list-style: none !important;
+  padding: 4px 0;
+}
+
+.canva-content-wrapper [class*="toc-check"],
+.canva-content-wrapper [class*="toc"] .check-icon {
+  color: var(--kurs-success) !important;
+}
+
+.canva-content-wrapper [class*="toc-link"],
+.canva-content-wrapper [class*="toc"] a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--kurs-n-600);
+  text-decoration: none;
+  border: none;
+  transition: color 0.15s;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.canva-content-wrapper [class*="toc-link"]:hover,
+.canva-content-wrapper [class*="toc"] a:hover {
+  color: var(--kurs-brand-600);
+}
+
+/* ── 7. COURSE PAGE ── */
+
+/* Course title */
+[class*="course_metadata"] h1,
+.course-page-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* Section H2 (What you'll learn, etc.) */
+[class*="course_metadata"] h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+[class*="course_metadata"] h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--kurs-brand-600), var(--kurs-brand-400));
+  border-radius: 2px;
+}
+
+/* Course description */
+[class*="course_metadata"] p {
+  color: var(--kurs-n-800);
+  font-size: 16px;
+  line-height: 1.8;
+  font-family: 'Inter', sans-serif;
+}
+
+/* "What you'll learn" items */
+[class*="course_metadata"] > div > div[class*="flex"][class*="space-x-2"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #F8F7FF;
+  border: 1px solid #DDD6FE;
+  border-radius: var(--kurs-r-md);
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+  color: var(--kurs-n-800);
+}
+
+[class*="course_metadata"] > div > div[class*="flex"][class*="space-x-2"]:hover {
+  background: var(--kurs-brand-100);
+  border-color: var(--kurs-brand-400);
+  transform: translateX(4px);
+}
+
+/* White cards */
+[class*="bg-white"][class*="shadow-md"],
+[class*="bg-white"][class*="outline"] {
+  background: #FFFFFF !important;
+  border: 1px solid var(--kurs-n-200) !important;
+  border-radius: var(--kurs-r-lg) !important;
+  box-shadow: var(--kurs-shadow-md) !important;
+  outline: none !important;
+}
+
+[class*="bg-white"][class*="shadow-md"]:hover {
+  box-shadow: var(--kurs-shadow-lg) !important;
+}
+
+/* Chapter headers */
+[class*="font-bold"][class*="bg-neutral-50"][class*="cursor-pointer"] {
+  background: var(--kurs-n-50) !important;
+  border-left: 3px solid transparent !important;
+  transition: all 0.15s ease !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+[class*="font-bold"][class*="bg-neutral-50"][class*="cursor-pointer"]:hover {
+  background: var(--kurs-brand-50) !important;
+  border-left-color: var(--kurs-brand-600) !important;
+}
+
+/* Chapter number badge */
+[class*="rounded-full"][class*="bg-neutral-200"][class*="text-neutral-600"] {
+  background: var(--kurs-brand-100) !important;
+  color: var(--kurs-brand-600) !important;
+  font-weight: 700 !important;
+}
+
+/* Activity link rows */
+a[class*="activity-container"] {
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+a[class*="activity-container"]:hover {
+  background: var(--kurs-brand-50);
+  border-left-color: var(--kurs-brand-600);
+}
+
+/* ── 8. QUIZ COMPONENT ── */
+.kurs-quiz {
+  background: #FFFFFF;
+  border: 1.5px solid #DDD6FE;
+  border-radius: var(--kurs-r-xl);
+  padding: 28px;
+  margin: 32px 0;
+  box-shadow: var(--kurs-shadow-sm);
+}
+
+.kurs-quiz-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--kurs-brand-600), var(--kurs-brand-400));
+  color: white;
+  padding: 4px 12px;
+  border-radius: var(--kurs-r-full);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 16px;
+}
+
+.kurs-quiz-question {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.kurs-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kurs-quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px solid var(--kurs-n-200);
+  border-radius: var(--kurs-r-md);
+  background: var(--kurs-n-50);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-size: 15px;
+  color: var(--kurs-n-800);
+  font-family: 'Inter', sans-serif;
+}
+
+.kurs-quiz-option:hover:not(:disabled) {
+  border-color: var(--kurs-brand-400);
+  background: #F8F7FF;
+}
+
+.kurs-quiz-option.correct {
+  border-color: var(--kurs-success);
+  background: var(--kurs-success-bg);
+  animation: kurs-correct-bounce 0.4s ease;
+}
+
+.kurs-quiz-option.incorrect {
+  border-color: var(--kurs-error);
+  background: var(--kurs-error-bg);
+  animation: kurs-wrong-shake 0.4s ease;
+}
+
+.kurs-quiz-letter {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--kurs-brand-100);
+  color: var(--kurs-brand-600);
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kurs-quiz-option.correct .kurs-quiz-letter {
+  background: var(--kurs-success);
+  color: white;
+}
+
+.kurs-quiz-option.incorrect .kurs-quiz-letter {
+  background: var(--kurs-error);
+  color: white;
+}
+
+.kurs-quiz-explanation {
+  background: var(--kurs-success-bg);
+  border: 1px solid #BBF7D0;
+  border-radius: var(--kurs-r-md);
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #166534;
+  margin-bottom: 16px;
+}
+
+.kurs-quiz-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--kurs-n-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.kurs-quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--kurs-brand-600), var(--kurs-brand-400));
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── 9. COMMENTS SECTION ── */
+.kurs-comments {
+  background: #FFFFFF;
+  border: 1px solid var(--kurs-n-200);
+  border-radius: var(--kurs-r-xl);
+  padding: 28px;
+  margin-top: 32px;
+}
+
+.kurs-comments-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--kurs-n-900);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kurs-comment-badge-count {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--kurs-brand-100);
+  color: var(--kurs-brand-600);
+  padding: 2px 10px;
+  border-radius: var(--kurs-r-full);
+}
+
+.kurs-comment-textarea {
+  width: 100%;
+  border: 1.5px solid var(--kurs-n-200);
+  border-radius: var(--kurs-r-md);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  resize: vertical;
+  min-height: 80px;
+  color: var(--kurs-n-800);
+  transition: border-color 0.15s;
+  background: #FFFFFF;
+}
+
+.kurs-comment-textarea:focus {
+  border-color: var(--kurs-brand-600);
+  outline: 2px solid rgba(124,58,237,0.15);
+  outline-offset: 0;
+}
+
+.kurs-comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--kurs-n-100);
+}
+
+.kurs-comment-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.kurs-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--kurs-brand-100);
+}
+
+.kurs-comment-badge-instructor {
+  background: var(--kurs-brand-100);
+  color: var(--kurs-brand-600);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--kurs-r-sm);
+}
+
+/* ── 10. BUTTONS ── */
+.kurs-btn-primary {
+  background: var(--kurs-brand-600);
+  color: #FFFFFF;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kurs-btn-primary:hover {
+  background: #6D28D9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+}
+
+.kurs-btn-primary:focus-visible {
+  outline: 2px solid var(--kurs-brand-400);
+  outline-offset: 2px;
+}
+
+.kurs-btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--kurs-brand-600);
+  color: var(--kurs-brand-600);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.kurs-btn-secondary:hover {
+  background: var(--kurs-brand-100);
+}
+
+/* Progress bar (linear, top of page) */
+[class*="progress-bar"],
+.activity-progress {
+  height: 4px;
+  background: linear-gradient(90deg, var(--kurs-brand-600), var(--kurs-brand-400));
+  border-radius: 2px;
+}
+
+/* ── 11. BREADCRUMB ── */
+nav[aria-label="breadcrumb"],
+[class*="breadcrumb"] {
+  font-size: 13px;
+  color: var(--kurs-n-500);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── 12. ACCESSIBILITY ── */
+*:focus-visible {
+  outline: 2px solid var(--kurs-brand-600);
+  outline-offset: 2px;
+}
+
+button, a[role="button"], [role="button"] {
+  min-height: 36px;
+}
+
+/* ── 13. MOBILE RESPONSIVE ── */
+@media (max-width: 768px) {
+  .canva-content-wrapper .ProseMirror {
+    padding: 20px 16px;
+    font-size: 15px;
+  }
+
+  .canva-content-wrapper .ProseMirror h1 {
+    font-size: 26px;
+  }
+
+  .canva-content-wrapper .ProseMirror h2 {
+    font-size: 20px;
+  }
+
+  .canva-content-wrapper .ProseMirror ul li {
+    padding: 10px 13px;
+  }
+
+  .kurs-quiz {
+    padding: 20px;
+  }
+}
+
+/* ── 14. REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

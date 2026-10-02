@@ -4,8 +4,7 @@
 @plugin 'tailwindcss-animate';
 
 @import 'tailwindcss';
-@import './ai-activity-premium.css';
-@import './activity-2026.css';
+@import './kursorium.css';
 
 
 @custom-variant dark (&:is(.dark *));
