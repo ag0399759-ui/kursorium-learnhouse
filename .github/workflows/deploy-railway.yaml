@@ -17,7 +17,10 @@ jobs:
 
       - name: Install Railway CLI
         run: |
-          curl -fsSL https://raw.githubusercontent.com/railwayapp/cli/main/install.sh | sh
+          curl -fsSL https://github.com/railwayapp/cli/releases/download/v5.63.1/railway-v5.63.1-x86_64-unknown-linux-gnu.tar.gz -o railway.tar.gz
+          tar -xzf railway.tar.gz
+          sudo install -m 0755 railway /usr/local/bin/railway
+          railway --version
 
       - name: Deploy to Railway
         env:
@@ -27,3 +30,4 @@ jobs:
             --service 978eeedb-ae4b-4b1e-890a-f0b47e00b508 \
             --environment 1deef1af-6e6c-4a12-a5d1-34e9f7558938 \
             --detach
+
