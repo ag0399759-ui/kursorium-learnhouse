@@ -7,27 +7,64 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/kursorium-web
+
 jobs:
-  deploy:
-    name: Deploy Frontend to Railway
+  build-and-deploy:
+    name: Build Docker Image & Deploy to Railway
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: |
-          curl -fsSL https://github.com/railwayapp/cli/releases/download/v5.63.1/railway-v5.63.1-x86_64-unknown-linux-gnu.tar.gz -o railway.tar.gz
-          tar -xzf railway.tar.gz
-          sudo install -m 0755 railway /usr/local/bin/railway
-          railway --version
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Deploy to Railway
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Update Railway service image & Deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          IMAGE_TAG: ghcr.io/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
         run: |
-          railway up \
-            --service 978eeedb-ae4b-4b1e-890a-f0b47e00b508 \
-            --environment 1deef1af-6e6c-4a12-a5d1-34e9f7558938 \
-            --detach
+          # 1. Update the Railway service to use our new Docker image
+          curl -s -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\":\"mutation { serviceInstanceUpdate(input: { source: { image: \\\"$IMAGE_TAG\\\", dockerCredentials: { registryUrl: \\\"ghcr.io\\\", username: \\\"${{ github.actor }}\\\", password: \\\"${{ secrets.GITHUB_TOKEN }}\\\" } } }, environmentId: \\\"1deef1af-6e6c-4a12-a5d1-34e9f7558938\\\", serviceId: \\\"978eeedb-ae4b-4b1e-890a-f0b47e00b508\\\") }\"}" \
+            | cat
+          
+          # 2. Trigger redeploy with the new image
+          curl -s -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"mutation { serviceInstanceRedeploy(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") }"}' \
+            | cat
+          echo "✅ Railway deployment triggered with image: $IMAGE_TAG"
 
