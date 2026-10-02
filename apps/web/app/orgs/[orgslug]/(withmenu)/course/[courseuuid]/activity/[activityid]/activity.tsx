@@ -539,23 +539,6 @@ function ActivityClient(props: ActivityClientProps) {
   return (
     <>
       <CourseProvider courseuuid={course?.course_uuid} initialCourseStructure={course}>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes kurs-fadein { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        .k26 .canva-content-wrapper .ProseMirror { padding:2.5rem 2rem; caret-color:transparent; color:#e2e8f0; line-height:1.8; font-size:16px; font-family:Inter,-apple-system,sans-serif; }
-        .k26 .canva-content-wrapper .ProseMirror h1 { font-size:36px; font-weight:800; margin-bottom:20px; margin-top:32px; background:linear-gradient(135deg,#fff 0%,#a78bfa 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em; line-height:1.2; }
-        .k26 .canva-content-wrapper .ProseMirror h2 { font-size:28px; font-weight:700; margin-bottom:16px; margin-top:40px; color:#f1f5f9; position:relative; padding-bottom:12px; }
-        .k26 .canva-content-wrapper .ProseMirror h2::after { content:''; position:absolute; bottom:0; left:0; width:48px; height:3px; background:linear-gradient(90deg,#7c3aed,#a78bfa); border-radius:2px; }
-        .k26 .canva-content-wrapper .ProseMirror h3 { font-size:22px; font-weight:600; margin-bottom:12px; margin-top:32px; color:#cbd5e1; }
-        .k26 .canva-content-wrapper .ProseMirror p { margin-bottom:16px; color:#94a3b8; line-height:1.8; }
-        .k26 .canva-content-wrapper .ProseMirror ul { list-style:none!important; padding:0!important; margin-bottom:24px; display:flex; flex-direction:column; gap:10px; }
-        .k26 .canva-content-wrapper .ProseMirror ul li { display:flex; align-items:flex-start; gap:12px; padding:14px 18px; background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.15); border-radius:12px; color:#cbd5e1; font-size:15px; line-height:1.6; transition:all 0.2s ease; }
-        .k26 .canva-content-wrapper .ProseMirror ul li::before { content:"→"; color:#7c3aed; font-weight:700; flex-shrink:0; }
-        .k26 .canva-content-wrapper .ProseMirror ul li p { margin:0; color:#cbd5e1; }
-        .k26 .canva-content-wrapper .ProseMirror ul li:hover { background:rgba(124,58,237,0.1); border-color:rgba(124,58,237,0.3); transform:translateX(4px); }
-        .k26 .canva-content-wrapper .ProseMirror strong, .k26 .canva-content-wrapper .ProseMirror b { color:#f1f5f9; font-weight:700; }
-        .k26 .canva-content-wrapper .ProseMirror a { color:#a78bfa; text-decoration:none; border-bottom:1px solid rgba(167,139,250,0.4); transition:all 0.2s ease; }
-        .k26 .canva-content-wrapper .ProseMirror a:hover { color:#c4b5fd; border-bottom-color:#c4b5fd; }
-      `}} />
         {/* Common ancestor of BOTH the task editors and the Submit button, which
             live in disjoint AssignmentSubmissionProvider subtrees. Lets Submit
             flush unsaved task answers before grading (avoids silent 0%). */}
