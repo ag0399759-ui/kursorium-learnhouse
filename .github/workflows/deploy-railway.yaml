@@ -56,34 +56,54 @@ jobs:
           IMAGE_TAG="ghcr.io/ag0399759-ui/kursorium-web:sha-${SHORT_SHA}"
           echo "Target image: $IMAGE_TAG"
 
-          # Check current service source
-          echo "--- Current source BEFORE update ---"
-          curl -sf -X POST https://backboard.railway.app/graphql/v2 \
-            -H "Authorization: Bearer $RAILWAY_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-raw '{"query":"{ serviceInstance(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { id source { image repo } } }"}' | python3 -c "import sys,json; d=json.load(sys.stdin); si=d['data']['serviceInstance']['source']; print('image:', si.get('image'), '| repo:', si.get('repo'))"
-
-          # Update service source to Docker image (clear repo, set image)
+          # Step 1: Update service source to Docker image
           echo "--- Updating source to Docker image ---"
           UPDATE=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
             -H "Authorization: Bearer $RAILWAY_TOKEN" \
             -H "Content-Type: application/json" \
             --data-raw "{\"query\":\"mutation { serviceInstanceUpdate(input: { source: { image: \\\"${IMAGE_TAG}\\\" } }, environmentId: \\\"1deef1af-6e6c-4a12-a5d1-34e9f7558938\\\", serviceId: \\\"978eeedb-ae4b-4b1e-890a-f0b47e00b508\\\") }\"}")
-          echo "Update result: $UPDATE"
+          echo "Update: $UPDATE"
 
-          # Verify source AFTER update
-          echo "--- Source AFTER update ---"
-          curl -sf -X POST https://backboard.railway.app/graphql/v2 \
+          # Step 2: Wait for propagation
+          echo "Waiting 10s for source update to propagate..."
+          sleep 10
+
+          # Step 3: Verify source changed
+          SOURCE=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
             -H "Authorization: Bearer $RAILWAY_TOKEN" \
             -H "Content-Type: application/json" \
-            --data-raw '{"query":"{ serviceInstance(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { id source { image repo } } }"}' | python3 -c "import sys,json; d=json.load(sys.stdin); si=d['data']['serviceInstance']['source']; print('image:', si.get('image'), '| repo:', si.get('repo'))"
+            --data-raw '{"query":"{ serviceInstance(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") { id source { image repo } } }"}')
+          echo "Current source: $SOURCE"
+          
+          # Step 4: Find available deploy mutations
+          echo "--- Available deploy-related mutations ---"
+          MUTATIONS=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-raw '{"query":"{ __type(name: \"Mutation\") { fields { name } } }"}')
+          echo "$MUTATIONS" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+fields = [f['name'] for f in data['data']['__type']['fields']]
+deploy = [f for f in fields if any(k in f.lower() for k in ['deploy', 'image'])]
+print('Deploy mutations:', deploy)
+"
 
-          # Trigger redeploy
-          echo "--- Triggering redeploy ---"
+          # Step 5: Try serviceInstanceDeploy (direct image deploy)
+          echo "--- Trying serviceInstanceDeploy ---"
+          DEPLOY=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer $RAILWAY_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-raw "{\"query\":\"mutation { serviceInstanceDeploy(environmentId: \\\"1deef1af-6e6c-4a12-a5d1-34e9f7558938\\\", serviceId: \\\"978eeedb-ae4b-4b1e-890a-f0b47e00b508\\\") { id status } }\"}" 2>&1 || true)
+          echo "serviceInstanceDeploy: $DEPLOY"
+          
+          # Step 6: Fallback - serviceInstanceRedeploy
+          echo "--- Fallback: serviceInstanceRedeploy ---"
           REDEPLOY=$(curl -sf -X POST https://backboard.railway.app/graphql/v2 \
             -H "Authorization: Bearer $RAILWAY_TOKEN" \
             -H "Content-Type: application/json" \
             --data-raw '{"query":"mutation { serviceInstanceRedeploy(environmentId: \"1deef1af-6e6c-4a12-a5d1-34e9f7558938\", serviceId: \"978eeedb-ae4b-4b1e-890a-f0b47e00b508\") }"}')
           echo "Redeploy: $REDEPLOY"
           echo "✅ Done: $IMAGE_TAG"
+
 
