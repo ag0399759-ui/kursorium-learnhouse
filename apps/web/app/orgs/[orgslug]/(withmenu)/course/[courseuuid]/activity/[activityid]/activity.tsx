@@ -795,54 +795,47 @@ function ActivityClient(props: ActivityClientProps) {
                     trailData={trailData}
                   />
                 ) : (
-                  <div className="space-y-4 pt-0 relative">
-                    <div className="pt-2 pb-3 sm:pb-6">
+                  <div style={{ minHeight: '100%', background: 'linear-gradient(135deg, #f8f7ff 0%, #f0f4ff 50%, #faf5ff 100%)' }}>
+                    <div style={{ padding: '16px 0 8px' }}>
                       <Breadcrumbs items={[
                         { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
                         { label: course.name, href: getUriWithOrg(orgslug, `/course/${courseuuid}`) },
                         { label: displayName }
                       ]} />
                     </div>
-                    <div className="space-y-3 sm:space-y-4 activity-info-section relative" style={{ zIndex: 'var(--z-content)' }}>
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                          <div className="flex space-x-4 sm:space-x-6 items-center">
-                            <div className="flex shrink-0">
-                              <Link
-                                href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
-                              >
-                                <img
-                                  className="w-[60px] h-[34px] sm:w-[100px] sm:h-[57px] rounded-md drop-shadow-md"
-                                  src={course.thumbnail_image
-                                    ? getCourseThumbnailMediaDirectory(
-                                        org?.org_uuid,
-                                        course.course_uuid,
-                                        course.thumbnail_image
-                                      )
-                                    : '/empty_thumbnail.png'
-                                  }
-                                  alt=""
+                    <div className="activity-info-section" style={{ zIndex: 'var(--z-content)', position: 'relative', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0', background: 'linear-gradient(135deg, #ffffff 0%, #f8f5ff 100%)', borderRadius: '20px', padding: '24px 28px', border: '1px solid rgba(124,58,237,0.10)', boxShadow: '0 4px 24px rgba(124,58,237,0.06), 0 1px 3px rgba(0,0,0,0.04)', marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                              <div style={{ flexShrink: 0 }}>
+                                <Link href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}>
+                                  <img
+                                    style={{ width: '88px', height: '52px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', objectFit: 'cover', transition: 'transform 0.2s ease', border: '2px solid rgba(124,58,237,0.12)' }}
+                                    src={course.thumbnail_image ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image) : '/empty_thumbnail.png'}
+                                    alt=""
+                                  />
+                                </Link>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '2px 10px', borderRadius: '999px', display: 'inline-block', width: 'fit-content' }}>{t('search.course')}</span>
+                                <h1 style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif", fontSize: '22px', fontWeight: 800, color: '#18181B', lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 }}>
+                                  {course.name}
+                                </h1>
+                              </div>
+                            </div>
+                            {activity && (
+                              <div style={{ flexShrink: 0 }}>
+                                <ActivityShareDropdown
+                                  activityName={activity.name}
+                                  activityUrl={typeof window !== 'undefined' ? window.location.href : ''}
+                                  orgslug={orgslug}
+                                  courseUuid={course.course_uuid}
+                                  activityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
+                                  activityType={activity.activity_type}
                                 />
-                              </Link>
-                            </div>
-                            <div className="flex flex-col -space-y-1">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">{t('search.course')} </p>
-                              <h1 className="font-bold text-gray-950 text-lg sm:text-3xl first-letter:uppercase">
-                                {course.name}
-                              </h1>
-                            </div>
+                              </div>
+                            )}
                           </div>
-                          {activity && (
-                            <div className="hidden sm:block">
-                              <ActivityShareDropdown
-                                activityName={activity.name}
-                                activityUrl={typeof window !== 'undefined' ? window.location.href : ''}
-                                orgslug={orgslug}
-                                courseUuid={course.course_uuid}
-                                activityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
-                                activityType={activity.activity_type}
-                              />
-                            </div>
-                          )}
                         </div>
 
                         <ActivityIndicators
@@ -857,10 +850,10 @@ function ActivityClient(props: ActivityClientProps) {
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-3">
                           <div className="flex flex-1 items-center space-x-3 min-w-0">
                             <div className="flex flex-col -space-y-1 min-w-0">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">
+                              <p style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#7C3AED', marginBottom: '4px' }}>
                                 {getChapterNameByActivityId(course, activity?.id) ?? chapterNameFromCourse}
                               </p>
-                              <h1 className="font-bold text-gray-950 text-base sm:text-2xl first-letter:uppercase">
+                              <h1 style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif", fontSize: '20px', fontWeight: 800, color: '#18181B', lineHeight: 1.25, letterSpacing: '-0.01em', margin: 0 }} className="first-letter:uppercase">
                                 {displayName}
                               </h1>
                               {/* Authors and Dates Section */}
