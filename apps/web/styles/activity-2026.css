@@ -1,0 +1,146 @@
+/* ============================================================
+   KURSORIUM 2026 — Premium Activity Page Theme
+   Imported directly by activity.tsx to guarantee bundling
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.activity-2026-theme {
+  background: #0f1117;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 32px 64px -12px rgba(0, 0, 0, 0.5),
+    0 4px 24px rgba(0, 0, 0, 0.3);
+  animation: kurs-fadein 0.4s ease forwards;
+}
+
+@keyframes kurs-fadein {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === ProseMirror content === */
+.activity-2026-theme .canva-content-wrapper .ProseMirror {
+  padding: 2.5rem 2rem;
+  caret-color: transparent;
+  color: #e2e8f0;
+  line-height: 1.8;
+  font-size: 16px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* === Headings === */
+.activity-2026-theme .canva-content-wrapper .ProseMirror h1 {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  margin-top: 32px;
+  background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  margin-top: 40px;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border-radius: 2px;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  margin-top: 32px;
+  color: #cbd5e1;
+}
+
+/* === Paragraphs === */
+.activity-2026-theme .canva-content-wrapper .ProseMirror p {
+  margin-bottom: 16px;
+  color: #94a3b8;
+  line-height: 1.8;
+}
+
+/* === Bullet lists — card style === */
+.activity-2026-theme .canva-content-wrapper .ProseMirror ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: 12px;
+  color: #cbd5e1;
+  font-size: 15px;
+  line-height: 1.6;
+  transition: all 0.2s ease;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror ul li::before {
+  content: '→';
+  color: #7c3aed;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror ul li p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror ul li:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: translateX(4px);
+}
+
+/* === Bold, links === */
+.activity-2026-theme .canva-content-wrapper .ProseMirror strong,
+.activity-2026-theme .canva-content-wrapper .ProseMirror b {
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror a {
+  color: #a78bfa;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.4);
+  transition: all 0.2s ease;
+}
+
+.activity-2026-theme .canva-content-wrapper .ProseMirror a:hover {
+  color: #c4b5fd;
+  border-bottom-color: #c4b5fd;
+}
