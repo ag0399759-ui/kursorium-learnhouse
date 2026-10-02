@@ -116,7 +116,7 @@ const THEME_2026_CSS = `
   return (
     <>
       {/* 2026 Premium Theme — injected from server component for guaranteed SSR */}
-      <style dangerouslySetInnerHTML={{ __html: THEME_2026_CSS }} />
+      <style>{THEME_2026_CSS}</style>
       <ActivityClient
       activityid={activityid}
       courseuuid={courseuuid}
