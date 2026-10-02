@@ -983,23 +983,23 @@ function ActivityClient(props: ActivityClientProps) {
                           {activity.content.paid_access == false ? (
                             <PaidCourseActivityDisclaimer course={course} />
                           ) : (
-                            <div className="flex gap-0" style={{ borderRadius: '12px', overflow: 'hidden', background: '#0d0f14', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <div className="flex gap-0" style={{ borderRadius: '16px', overflow: 'hidden', background: '#ffffff', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06)' }}>
                               {/* Main content area */}
                               <div
                                 className={`flex-1 min-w-0 relative isolate`}
-                                style={{ zIndex: 'var(--z-base)', background: '#0d0f14' }}
+                                style={{ zIndex: 'var(--z-base)', background: '#ffffff' }}
                               >
-                                 <div className={`${activity.activity_type === "TYPE_SCORM" ? "" : activity.activity_type === "TYPE_VIDEO" ? "" : activity.activity_type === "TYPE_DYNAMIC" ? "k26" : "p-4 sm:p-7"} relative`} style={activity.activity_type === "TYPE_DYNAMIC" ? {background:"#0f1117",borderRadius:"20px",border:"1px solid rgba(255,255,255,0.06)",overflow:"hidden",boxShadow:"0 0 0 1px rgba(255,255,255,0.04),0 32px 64px -12px rgba(0,0,0,0.5)",animation:"kurs-fadein 0.4s ease forwards"} : activity.activity_type !== "TYPE_SCORM" && activity.activity_type !== "TYPE_VIDEO" ? {padding:"1rem 1.75rem"} : undefined}>
+                                 <div className={`${activity.activity_type === "TYPE_SCORM" ? "" : activity.activity_type === "TYPE_VIDEO" ? "" : activity.activity_type === "TYPE_DYNAMIC" ? "" : "p-4 sm:p-7"} relative`} style={activity.activity_type === "TYPE_DYNAMIC" ? {background:"#ffffff",borderRadius:"16px",overflow:"hidden",animation:"kurs-fadein 0.4s ease forwards"} : activity.activity_type !== "TYPE_SCORM" && activity.activity_type !== "TYPE_VIDEO" ? {padding:"1.5rem 2rem"} : undefined}>
                                   {/* Focus mode button */}
                                   <button
                                     onClick={() => setIsFocusMode(true)}
                                     className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 end-2' : 'top-3 end-3'} hidden sm:flex z-10 p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
-                                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
                                     title={t('activities.focus_mode')}
                                   >
                                     <div className="flex items-center">
-                                      <Maximize2 size={15} style={{ color: 'rgba(255,255,255,0.7)' }} />
-                                      <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 w-0 group-hover:w-auto group-hover:ms-2 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                                      <Maximize2 size={15} style={{ color: '#7c3aed' }} />
+                                      <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 w-0 group-hover:w-auto group-hover:ms-2 whitespace-nowrap" style={{ color: '#7c3aed' }}>
                                         {t('activities.focus_mode')}
                                       </span>
                                     </div>
@@ -1013,7 +1013,7 @@ function ActivityClient(props: ActivityClientProps) {
                               {/* Sticky sidebar — 320px wide */}
                               <div
                                 className="hidden lg:block shrink-0 sticky top-0"
-                                style={{ width: '320px', maxHeight: '85vh', overflow: 'hidden' }}
+                                style={{ width: '320px', maxHeight: '85vh', overflow: 'hidden', borderLeft: '1px solid #f3f4f6', background: '#fafafa' }}
                               >
                                 <CourseActivitySidebar
                                   course={course}
