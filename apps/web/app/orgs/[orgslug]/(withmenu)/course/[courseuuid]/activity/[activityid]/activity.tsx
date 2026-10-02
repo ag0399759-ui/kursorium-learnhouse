@@ -29,6 +29,7 @@ import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActi
 import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
 import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown'
+import CourseActivitySidebar from '@components/Pages/Activity/CourseActivitySidebar'
 import ActivityShareDropdown from '@components/Pages/Activity/ActivityShareDropdown'
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar'
 import CourseEndView from '@components/Pages/Activity/CourseEndView'
@@ -982,26 +983,46 @@ function ActivityClient(props: ActivityClientProps) {
                           {activity.content.paid_access == false ? (
                             <PaidCourseActivityDisclaimer course={course} />
                           ) : (
-                            <div className="flex gap-6">
-                              <div className={`flex-1 min-w-0 ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : 'p-3 sm:p-7 rounded-lg'} ${bgColor} relative isolate`} style={{ zIndex: 'var(--z-base)' }}>
-                                <button
-                                  onClick={() => setIsFocusMode(true)}
-                                  className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 end-2' : 'top-4 end-4'} hidden sm:flex bg-white/80 hover:bg-white nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
-                                  style={{ zIndex: 'var(--z-interactive)' }}
-                                  title={t('activities.focus_mode')}
-                                >
-                                  <div className="flex items-center">
-                                    <Maximize2 size={16} className="text-gray-700" />
-                                    <span className="text-xs font-bold text-gray-700 opacity-0 group-hover:opacity-100 transition-all duration-200 w-0 group-hover:w-auto group-hover:ms-2 whitespace-nowrap">
-                                      {t('activities.focus_mode')}
-                                    </span>
-                                  </div>
-                                </button>
-                                {activityContent}
+                            <div className="flex gap-0" style={{ borderRadius: '12px', overflow: 'hidden', background: '#0d0f14', border: '1px solid rgba(255,255,255,0.07)' }}>
+                              {/* Main content area */}
+                              <div
+                                className={`flex-1 min-w-0 relative isolate`}
+                                style={{ zIndex: 'var(--z-base)', background: '#0d0f14' }}
+                              >
+                                <div className={`${activity.activity_type === 'TYPE_SCORM' ? '' : activity.activity_type === 'TYPE_VIDEO' ? '' : activity.activity_type === 'TYPE_DYNAMIC' ? 'activity-2026-theme' : 'p-4 sm:p-7'} relative`}>
+                                  {/* Focus mode button */}
+                                  <button
+                                    onClick={() => setIsFocusMode(true)}
+                                    className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 end-2' : 'top-3 end-3'} hidden sm:flex z-10 p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
+                                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                                    title={t('activities.focus_mode')}
+                                  >
+                                    <div className="flex items-center">
+                                      <Maximize2 size={15} style={{ color: 'rgba(255,255,255,0.7)' }} />
+                                      <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 w-0 group-hover:w-auto group-hover:ms-2 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                                        {t('activities.focus_mode')}
+                                      </span>
+                                    </div>
+                                  </button>
+                                  {activityContent}
+                                </div>
+                                <Suspense fallback={null}>
+                                  <AISidePanelInline activity={activity} />
+                                </Suspense>
                               </div>
-                              <Suspense fallback={null}>
-                                <AISidePanelInline activity={activity} />
-                              </Suspense>
+                              {/* Sticky sidebar — 320px wide */}
+                              <div
+                                className="hidden lg:block shrink-0 sticky top-0"
+                                style={{ width: '320px', maxHeight: '85vh', overflow: 'hidden' }}
+                              >
+                                <CourseActivitySidebar
+                                  course={course}
+                                  orgslug={orgslug}
+                                  courseuuid={courseuuid}
+                                  currentActivityId={activityid}
+                                  trailData={trailData}
+                                />
+                              </div>
                             </div>
                           )}
                         </>
