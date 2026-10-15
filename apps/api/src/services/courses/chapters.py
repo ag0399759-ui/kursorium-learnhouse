@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 from sqlalchemy import func
@@ -24,6 +24,8 @@ from src.services.courses.locks import (
     is_locked_for_user,
     is_org_admin,
 )
+from src.services.courses.drip import is_drip_unlocked, drip_unlocks_at
+from src.db.trail_runs import TrailRun
 
 
 ####################################################
@@ -370,7 +372,7 @@ async def get_course_chapters(
         for chapter in chapters:
             chapter.activities = chapter_activities_map.get(chapter.id, [])
 
-    await _apply_locks_to_chapters(chapters, course, current_user, db_session)
+    await _apply_locks_to_chapters(chapters, course, current_user, db_session, request)
 
     return chapters
 
@@ -380,6 +382,7 @@ async def _apply_locks_to_chapters(
     course: "Course | None",
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: AsyncSession,
+    request: Request | None = None,
 ) -> None:
     """Compute is_locked for each chapter + activity and strip content for locked items.
 
@@ -420,6 +423,22 @@ async def _apply_locks_to_chapters(
     # Course-level usergroup membership unlocks everything below it.
     course_grants_access = course.course_uuid in accessible
 
+    # Drip content: если у course есть drip_timezone и drip_unlock_hour,
+    # загружаем TrailRun для текущего юзера и проверяем drip_day для каждого chapter/activity.
+    trail_run = None
+    if (
+        not is_anon
+        and course.drip_timezone is not None
+        and course.drip_unlock_hour is not None
+    ):
+        stmt = (
+            select(TrailRun)
+            .where(TrailRun.course_id == course.id)
+            .where(TrailRun.user_id == acting_user_id)
+        )
+        result = await db_session.execute(stmt)
+        trail_run = result.scalars().first()
+
     for chapter in chapters:
         chapter_locked = False if course_grants_access else await is_locked_for_user(
             chapter.lock_type,
@@ -430,6 +449,29 @@ async def _apply_locks_to_chapters(
             accessible_restricted_uuids=accessible,
             is_admin=admin,
         )
+
+        # Перевірка drip для chapter
+        if trail_run and chapter.drip_day is not None:
+            now = getattr(request.state, "now", datetime.now(timezone.utc)) if request else datetime.now(timezone.utc)
+            if not is_drip_unlocked(
+                chapter.drip_day,
+                trail_run.creation_date,
+                now,
+                course.drip_timezone,  # type: ignore
+                course.drip_unlock_hour,  # type: ignore
+            ):
+                chapter.drip_locked = True
+                chapter.unlocks_at = drip_unlocks_at(
+                    chapter.drip_day,
+                    trail_run.creation_date,
+                    course.drip_timezone,  # type: ignore
+                    course.drip_unlock_hour,  # type: ignore
+                )
+                chapter_locked = True
+            else:
+                chapter.drip_locked = False
+                chapter.unlocks_at = None
+
         chapter.is_locked = chapter_locked
         if chapter_locked:
             chapter.description = ""
@@ -450,6 +492,29 @@ async def _apply_locks_to_chapters(
                     accessible_restricted_uuids=accessible,
                     is_admin=admin,
                 )
+
+            # Перевірка drip для activity
+            if trail_run and activity.drip_day is not None:
+                now = getattr(request.state, "now", datetime.now(timezone.utc)) if request else datetime.now(timezone.utc)
+                if not is_drip_unlocked(
+                    activity.drip_day,
+                    trail_run.creation_date,
+                    now,
+                    course.drip_timezone,  # type: ignore
+                    course.drip_unlock_hour,  # type: ignore
+                ):
+                    activity.drip_locked = True
+                    activity.unlocks_at = drip_unlocks_at(
+                        activity.drip_day,
+                        trail_run.creation_date,
+                        course.drip_timezone,  # type: ignore
+                        course.drip_unlock_hour,  # type: ignore
+                    )
+                    activity_locked = True
+                else:
+                    activity.drip_locked = False
+                    activity.unlocks_at = None
+
             activity.is_locked = activity_locked
             if activity_locked:
                 activity.content = {}
