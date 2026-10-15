@@ -49,6 +49,7 @@ class ActivityBase(SQLModel):
     details: Optional[dict] = Field(default=None, sa_column=Column(JSON))
     published: bool = False
     lock_type: ActivityLockType = ActivityLockType.PUBLIC
+    drip_day: Optional[int] = None
 
 
 class Activity(ActivityBase, table=True):
@@ -89,6 +90,7 @@ class ActivityUpdate(SQLModel):
     details: Optional[dict] = None
     published: Optional[bool] = None
     lock_type: Optional[ActivityLockType] = None
+    drip_day: Optional[int] = None
     extra_metadata: Optional[dict] = None
 
 
@@ -107,3 +109,5 @@ class ActivityRead(ActivityBase):
     last_modified_by_username: Optional[str] = None
     # Computed per-request: true if current user cannot access this activity.
     is_locked: bool = False
+    drip_locked: bool = False
+    unlocks_at: Optional[str] = None
