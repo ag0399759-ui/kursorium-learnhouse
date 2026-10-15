@@ -23,6 +23,8 @@ from botocore.exceptions import ClientError
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.core.events.database import get_db_session
 from src.db.courses.courses import Course
+from src.db.courses.activities import Activity
+from src.db.trail_runs import TrailRun
 from src.db.podcasts.podcasts import Podcast
 from src.db.users import AnonymousUser, PublicUser, APITokenUser
 from src.db.user_organizations import UserOrganization
@@ -31,6 +33,7 @@ from src.security.submission_file_access import (
     is_submission_file,
     enforce_submission_file_access,
 )
+from src.services.courses.drip import is_drip_unlocked
 from src.services.courses.transfer.storage_utils import (
     get_storage_client,
     get_s3_bucket_name,
@@ -197,6 +200,42 @@ async def _check_content_access(
         )).scalars().first()
         if not membership:
             raise HTTPException(status_code=403, detail="Access denied")
+
+        # Drip check: if activity has drip_day and user is not AnonymousUser/APITokenUser,
+        # check if content is unlocked
+        if not isinstance(current_user, (AnonymousUser, APITokenUser)):
+            activity_uuid = parts[5]
+            activity = (await db_session.execute(
+                select(Activity).where(Activity.activity_uuid == activity_uuid)
+            )).scalars().first()
+
+            if activity and activity.drip_day is not None:
+                # Find user's enrollment
+                trail = (await db_session.execute(
+                    select(TrailRun).where(
+                        TrailRun.user_id == current_user.id,
+                        TrailRun.course_id == course.id,
+                    )
+                )).scalars().first()
+
+                if not trail:
+                    raise HTTPException(status_code=403, detail="Not enrolled in course")
+
+                from datetime import datetime, timezone
+                unlocked = is_drip_unlocked(
+                    drip_day=activity.drip_day,
+                    enrolled_at=trail.creation_date,
+                    now=datetime.now(timezone.utc),
+                    tz=course.drip_timezone or "Europe/Warsaw",
+                    unlock_hour=course.drip_unlock_hour if course.drip_unlock_hour is not None else 6,
+                )
+
+                if not unlocked:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Content not yet unlocked. This lesson will be available later."
+                    )
+
         return
 
     # Podcast episode content: requires podcast to be public or user to be org member

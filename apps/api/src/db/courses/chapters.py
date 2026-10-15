@@ -18,6 +18,7 @@ class ChapterBase(SQLModel):
     description: Optional[str] = ""
     thumbnail_image: Optional[str] = ""
     lock_type: LockType = LockType.PUBLIC
+    drip_day: Optional[int] = None
     org_id: int = Field(
         sa_column=Column("org_id", Integer, ForeignKey("organization.id", ondelete="CASCADE"), index=True)
     )
@@ -46,6 +47,7 @@ class ChapterUpdate(SQLModel):
     description: Optional[str] = None
     thumbnail_image: Optional[str] = None
     lock_type: Optional[LockType] = None
+    drip_day: Optional[int] = None
     extra_metadata: Optional[dict] = None
 
 
@@ -60,6 +62,8 @@ class ChapterRead(ChapterBase):
     # content (and, by cascade, its activities). Metadata (name, thumbnail) is still
     # returned so TOC navigation still renders a lock placeholder.
     is_locked: bool = False
+    drip_locked: bool = False
+    unlocks_at: Optional[str] = None
     pass
 
 

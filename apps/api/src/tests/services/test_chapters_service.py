@@ -858,3 +858,307 @@ class TestApplyLocksToChapters:
                     with_unpublished_activities=True, slim=False, course=course,
                 )
         assert len(full_result[0].activities) == 1
+
+
+class TestDripContentIntegration:
+    """Integration tests for drip content in get_course_chapters."""
+
+    @pytest.mark.asyncio
+    async def test_drip_day_blocks_chapter_before_unlock(self, db, org, admin_user):
+        """A chapter with drip_day=1 is locked on day 0, open on day 1+."""
+        from datetime import datetime, timezone
+        from src.db.trail_runs import TrailRun, StatusEnum
+
+        def stub_request(now):
+            return SimpleNamespace(state=SimpleNamespace(now=now))
+
+        course = Course(
+            name="Drip Course",
+            org_id=org.id,
+            course_uuid="test-drip-course",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            drip_timezone="Europe/Warsaw",
+            drip_unlock_hour=6,
+            public=True,
+            published=True,
+            open_to_contributors=False,
+        )
+        db.add(course)
+        await db.flush()
+
+        chapter = Chapter(
+            name="Locked Chapter",
+            course_id=course.id,
+            chapter_uuid="test-chapter-locked",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            description="Original description",
+            drip_day=1,
+            org_id=org.id,
+        )
+        db.add(chapter)
+        await db.flush()
+
+        course_chapter = CourseChapter(
+            course_id=course.id,
+            chapter_id=chapter.id,
+            order=0,
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+        )
+        db.add(course_chapter)
+        await db.flush()
+
+        activity = Activity(
+            name="Test Activity",
+            activity_uuid="test-activity",
+            activity_type=ActivityTypeEnum.TYPE_VIDEO,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_VIDEO_HOSTED,
+            content={"url": "test.mp4"},
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            details={"duration": 100},
+            org_id=org.id,
+        )
+        db.add(activity)
+        await db.flush()
+
+        chapter_activity = ChapterActivity(
+            chapter_id=chapter.id,
+            activity_id=activity.id,
+            order=0,
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+        )
+        db.add(chapter_activity)
+        await db.flush()
+
+        # Enrol student 10 Sep 08:00 UTC.
+        student = SimpleNamespace(
+            id=999,
+            username="student",
+            email="student@test.com",
+            org_id=org.id,
+            role_id=1,
+        )
+        trail_run = TrailRun(
+            trail_id=1,
+            course_id=course.id,
+            org_id=org.id,
+            user_id=student.id,
+            creation_date="2026-09-10 08:00:00",
+            update_date="2026-09-10 08:00:00",
+            status=StatusEnum.STATUS_IN_PROGRESS,
+        )
+        db.add(trail_run)
+        await db.commit()
+
+        # Day 0: chapter locked (03:59 UTC = 05:59 Warsaw, still before 06:00).
+        now_day0 = datetime(2026, 9, 11, 3, 59, tzinfo=timezone.utc)
+        with patch("src.services.courses.chapters.check_resource_access", new_callable=AsyncMock):
+            chapters = await get_course_chapters(
+                request=stub_request(now_day0),
+                course_id=course.id,
+                db_session=db,
+                current_user=student,
+                course=course,
+                with_unpublished_activities=False,
+            )
+        assert len(chapters) == 1
+        assert chapters[0].is_locked is True
+        assert chapters[0].description == ""  # stripped
+        assert chapters[0].unlocks_at == datetime(2026, 9, 11, 4, 0, tzinfo=timezone.utc)
+
+        # Day 1: chapter open (04:00 UTC = 06:00 Warsaw).
+        now_day1 = datetime(2026, 9, 11, 4, 0, tzinfo=timezone.utc)
+        with patch("src.services.courses.chapters.check_resource_access", new_callable=AsyncMock):
+            chapters = await get_course_chapters(
+                request=stub_request(now_day1),
+                course_id=course.id,
+                db_session=db,
+                current_user=student,
+                course=course,
+                with_unpublished_activities=False,
+            )
+        assert chapters[0].is_locked is False
+        assert chapters[0].description == "Original description"
+        assert chapters[0].unlocks_at is None
+
+    @pytest.mark.asyncio
+    async def test_drip_day_blocks_activity_before_unlock(self, db, org, admin_user):
+        """An activity with drip_day=2 is locked until day 2."""
+        from datetime import datetime, timezone
+        from src.db.trail_runs import TrailRun, StatusEnum
+
+        def stub_request(now):
+            return SimpleNamespace(state=SimpleNamespace(now=now))
+
+        course = Course(
+            name="Drip Course Activity",
+            org_id=org.id,
+            course_uuid="test-drip-course-activity",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            drip_timezone="Europe/Warsaw",
+            drip_unlock_hour=6,
+            public=True,
+            open_to_contributors=False,
+        )
+        db.add(course)
+        await db.flush()
+
+        chapter = Chapter(
+            name="Open Chapter",
+            course_id=course.id,
+            chapter_uuid="test-chapter-open",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            drip_day=None,
+            org_id=org.id,
+        )
+        db.add(chapter)
+        await db.flush()
+
+        course_chapter = CourseChapter(
+            course_id=course.id,
+            chapter_id=chapter.id,
+            order=0,
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+        )
+        db.add(course_chapter)
+        await db.flush()
+
+        activity = Activity(
+            name="Drip Activity",
+            activity_uuid="test-drip-activity",
+            activity_type=ActivityTypeEnum.TYPE_VIDEO,
+            activity_sub_type=ActivitySubTypeEnum.SUBTYPE_VIDEO_HOSTED,
+            content={"url": "test.mp4"},
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            details={"duration": 100},
+            org_id=org.id,
+            course_id=course.id,
+            drip_day=2,
+            published=True,
+        )
+        db.add(activity)
+        await db.flush()
+
+        chapter_activity = ChapterActivity(
+            chapter_id=chapter.id,
+            activity_id=activity.id,
+            order=0,
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+        )
+        db.add(chapter_activity)
+        await db.flush()
+
+        student = SimpleNamespace(
+            id=1000,
+            username="student2",
+            email="student2@test.com",
+            org_id=org.id,
+            role_id=1,
+        )
+        trail_run = TrailRun(
+            trail_id=1,
+            course_id=course.id,
+            org_id=org.id,
+            user_id=student.id,
+            creation_date="2026-09-10 08:00:00",
+            update_date="2026-09-10 08:00:00",
+            status=StatusEnum.STATUS_IN_PROGRESS,
+        )
+        db.add(trail_run)
+        await db.commit()
+
+        # Day 1: activity locked.
+        now_day1 = datetime(2026, 9, 11, 4, 0, tzinfo=timezone.utc)
+        with patch("src.services.courses.chapters.check_resource_access", new_callable=AsyncMock):
+            chapters = await get_course_chapters(
+                request=stub_request(now_day1),
+                course_id=course.id,
+                db_session=db,
+                current_user=student,
+                course=course,
+                with_unpublished_activities=False,
+            )
+        print(f"DEBUG chapters={chapters}")
+        assert len(chapters[0].activities) == 1
+        assert chapters[0].activities[0].is_locked is True
+        assert chapters[0].activities[0].content == {}
+        assert chapters[0].activities[0].unlocks_at == datetime(2026, 9, 12, 4, 0, tzinfo=timezone.utc)
+
+        # Day 2: activity open.
+        now_day2 = datetime(2026, 9, 12, 4, 0, tzinfo=timezone.utc)
+        with patch("src.services.courses.chapters.check_resource_access", new_callable=AsyncMock):
+            chapters = await get_course_chapters(
+                request=stub_request(now_day2),
+                course_id=course.id,
+                db_session=db,
+                current_user=student,
+                course=course,
+                with_unpublished_activities=False,
+            )
+        assert chapters[0].activities[0].is_locked is False
+        assert chapters[0].activities[0].content == {"url": "test.mp4"}
+        assert chapters[0].activities[0].unlocks_at is None
+
+    @pytest.mark.asyncio
+    async def test_drip_disabled_for_admin(self, db, org, admin_user):
+        """Admins see all drip content regardless of day."""
+        from datetime import datetime, timezone
+
+        course = Course(
+            name="Admin Drip Course",
+            org_id=org.id,
+            course_uuid="test-admin-drip",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            drip_timezone="Europe/Warsaw",
+            drip_unlock_hour=6,
+            public=True,
+            published=True,
+            open_to_contributors=False,
+        )
+        db.add(course)
+        await db.flush()
+
+        chapter = Chapter(
+            name="Admin Locked Chapter",
+            course_id=course.id,
+            chapter_uuid="test-admin-chapter",
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            drip_day=999,
+            org_id=org.id,
+        )
+        db.add(chapter)
+        await db.flush()
+
+        course_chapter = CourseChapter(
+            course_id=course.id,
+            chapter_id=chapter.id,
+            order=1,
+            creation_date=str(datetime.now(timezone.utc)),
+            update_date=str(datetime.now(timezone.utc)),
+            org_id=org.id,
+        )
+        db.add(course_chapter)
+        await db.commit()
+
+        with patch("src.services.courses.chapters.check_resource_access", new_callable=AsyncMock):
+            chapters = await get_course_chapters(
+                request=SimpleNamespace(state=SimpleNamespace(now=datetime.now(timezone.utc))),
+                course_id=course.id,
+                db_session=db,
+                current_user=admin_user,
+                course=course,
+                with_unpublished_activities=False,
+            )
+        assert len(chapters) == 1
+        assert chapters[0].is_locked is False

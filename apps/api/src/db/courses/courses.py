@@ -57,6 +57,8 @@ class CourseBase(SQLModel):
     public: bool
     published: bool = Field(default=False)
     open_to_contributors: bool
+    drip_timezone: str = "Europe/Warsaw"
+    drip_unlock_hour: int = 6
 
 
 class Course(CourseBase, table=True):
@@ -100,6 +102,8 @@ class CourseUpdate(SQLModel):
     public: Optional[bool] = None
     published: Optional[bool] = None
     open_to_contributors: Optional[bool] = None
+    drip_timezone: Optional[str] = None
+    drip_unlock_hour: Optional[int] = None
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
 

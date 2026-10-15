@@ -12,7 +12,7 @@ from src.security.auth import resolve_acting_user_id
 from fastapi import HTTPException, Request
 from pydantic import BaseModel
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 
 import asyncio
 import logging
@@ -25,6 +25,11 @@ from src.services.courses.locks import (
     is_locked_for_user,
     is_org_admin,
 )
+from src.services.courses.drip import (
+    is_drip_unlocked,
+    drip_unlocks_at,
+)
+from src.db.trail_runs import TrailRun
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +328,24 @@ async def _apply_activity_lock(
         is_admin=admin,
     )
 
+    # Apply drip locks
+    if course.drip_timezone and not is_anon:
+        trail_run = (await db_session.execute(
+            select(TrailRun)
+            .where(
+                TrailRun.course_id == course.id,
+                TrailRun.user_id == acting_user_id,
+            )
+        )).scalars().first()
+
+        if trail_run:
+            now_utc = datetime.now(timezone.utc)
+            if not is_drip_unlocked(activity.drip_day, trail_run.start_date, now_utc, course.drip_timezone):
+                activity_read.is_locked = True
+                activity_read.drip_locked = True
+                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.start_date, course.drip_timezone)
+                activity_locked = True
+
     if activity_locked:
         activity_read.content = {}
         activity_read.details = None
@@ -538,4 +561,40 @@ async def get_activities(
     _, chapter, course = results[0]
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
-    return [ActivityRead.model_validate(activity) for activity, _, _ in results]
+    # Check if user is admin
+    is_anon = isinstance(current_user, AnonymousUser)
+    acting_user_id = resolve_acting_user_id(current_user)
+    admin = False if is_anon else await is_org_admin(acting_user_id, course.org_id, db_session)
+
+    # Get TrailRun if drip is enabled
+    trail_run = None
+    now_utc = None
+    if course.drip_timezone and not admin:
+        now_utc = datetime.now(timezone.utc)
+        if not is_anon:
+            trail_run_row = (await db_session.execute(
+                select(TrailRun)
+                .where(
+                    TrailRun.course_id == course.id,
+                    TrailRun.user_id == acting_user_id,
+                )
+            )).scalars().first()
+            if trail_run_row:
+                trail_run = trail_run_row
+
+    activities_read = []
+    for activity, _, _ in results:
+        activity_read = ActivityRead.model_validate(activity)
+
+        # Apply drip locks
+        if trail_run and now_utc and course.drip_timezone:
+            if not is_drip_unlocked(activity.drip_day, trail_run.start_date, now_utc, course.drip_timezone):
+                activity_read.is_locked = True
+                activity_read.drip_locked = True
+                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.start_date, course.drip_timezone)
+                activity_read.content = {}
+                activity_read.details = None
+
+        activities_read.append(activity_read)
+
+    return activities_read
