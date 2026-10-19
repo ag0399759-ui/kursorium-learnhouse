@@ -340,10 +340,10 @@ async def _apply_activity_lock(
 
         if trail_run:
             now_utc = datetime.now(timezone.utc)
-            if not is_drip_unlocked(activity.drip_day, trail_run.start_date, now_utc, course.drip_timezone):
+            if not is_drip_unlocked(activity.drip_day, trail_run.creation_date, now_utc, course.drip_timezone):
                 activity_read.is_locked = True
                 activity_read.drip_locked = True
-                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.start_date, course.drip_timezone)
+                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.creation_date, course.drip_timezone)
                 activity_locked = True
 
     if activity_locked:
@@ -588,10 +588,10 @@ async def get_activities(
 
         # Apply drip locks
         if trail_run and now_utc and course.drip_timezone:
-            if not is_drip_unlocked(activity.drip_day, trail_run.start_date, now_utc, course.drip_timezone):
+            if not is_drip_unlocked(activity.drip_day, trail_run.creation_date, now_utc, course.drip_timezone):
                 activity_read.is_locked = True
                 activity_read.drip_locked = True
-                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.start_date, course.drip_timezone)
+                activity_read.unlocks_at = drip_unlocks_at(activity.drip_day, trail_run.creation_date, course.drip_timezone)
                 activity_read.content = {}
                 activity_read.details = None
 
