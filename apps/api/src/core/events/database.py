@@ -396,6 +396,18 @@ async def _bootstrap_schema():
         # Create all tables
         if not is_testing:
             await conn.run_sync(SQLModel.metadata.create_all)
+            # create_all never alters existing tables and alembic is not run on
+            # deploy, so add the drip columns (migration b7c8d9e0f1g2) in place.
+            # Idempotent, additive; old rows keep drip disabled (NULL = always open).
+            from sqlalchemy import text
+            if conn.dialect.name == "postgresql":
+                for stmt in (
+                    "ALTER TABLE activity ADD COLUMN IF NOT EXISTS drip_day INTEGER NULL",
+                    "ALTER TABLE chapter ADD COLUMN IF NOT EXISTS drip_day INTEGER NULL",
+                    "ALTER TABLE course ADD COLUMN IF NOT EXISTS drip_timezone TEXT NOT NULL DEFAULT 'Europe/Warsaw'",
+                    "ALTER TABLE course ADD COLUMN IF NOT EXISTS drip_unlock_hour INTEGER NOT NULL DEFAULT 6",
+                ):
+                    await conn.execute(text(stmt))
 
 
 async def connect_to_db(app: FastAPI):

@@ -38,12 +38,13 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:dev
             ghcr.io/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Find correct Railway deploy mutation
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          IMAGE="ghcr.io/${{ env.IMAGE_NAME }}:dev"
+          IMAGE="ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}"
           echo "Image to deploy: $IMAGE"
 
           # Update Railway service source to Docker image
